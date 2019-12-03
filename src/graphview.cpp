@@ -17,6 +17,10 @@ void GraphView::addNodeToScene(Node *node){
     this->scene()->addItem(node);
 }
 
+void GraphView::invalidateScene(){
+    this->scene()->invalidate();
+}
+
 void GraphView::contextMenuEvent(QContextMenuEvent *event){
     for (auto gi: scene()->selectedItems())
         gi->setSelected(false);
@@ -87,7 +91,6 @@ void GraphView::mousePressEvent(QMouseEvent *event){
                 if(arcTo != arcFrom){
                     Edge *edge = new Edge(arcTo, arcFrom);
                     emit addEdge(edge);
-                    //scene()->addItem(edge);
                 }
             }
         }
@@ -98,7 +101,7 @@ void GraphView::mousePressEvent(QMouseEvent *event){
 }
 
 void GraphView::mouseReleaseEvent(QMouseEvent *event) {
-
+    scene()->invalidate(); //to recalc Edge Rect after draging !!
     QGraphicsView::mouseReleaseEvent(event);
 }
 

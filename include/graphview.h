@@ -17,6 +17,7 @@ public:
 public slots:
     void addEdgeToScene(Edge *edge);
     void addNodeToScene(Node *node);
+    void invalidateScene();
 signals:
     void addEdge(Edge* edge);
     void addNode(Node* node);
@@ -28,6 +29,8 @@ signals:
     void renameNode(Node* node);
     void changeDist(Edge* edge);
     void createNode(QPointF pos);
+
+    void nodePosChanged(Node* node); //TODO
 protected:
     void contextMenuEvent(QContextMenuEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;

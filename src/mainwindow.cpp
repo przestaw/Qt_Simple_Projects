@@ -9,11 +9,24 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow){
     ui->setupUi(this);
 
+    nodeProp = new NodeProp(&graph); //needed for data validation
+    edgeProp = new EdgeProp();
+    ui->stackedWidget->widget(1)->setLayout(nodeProp);
+    ui->stackedWidget->widget(2)->setLayout(edgeProp);
+
+    connect(this, SIGNAL(setActiveNode(Node*)), nodeProp, SLOT(setActiveNode(Node*)));
+    connect(this, SIGNAL(setActiveEdge(Edge*)), edgeProp, SLOT(setActiveEdge(Edge*)));
+
+    connect(this, SIGNAL(graphEdited()), ui->graphicsView, SLOT(invalidateScene()));
+    connect(nodeProp, SIGNAL(graphEdited()), ui->graphicsView, SLOT(invalidateScene()));
+    connect(edgeProp, SIGNAL(graphEdited()), ui->graphicsView, SLOT(invalidateScene()));
+
     connect(ui->actionAdd, SIGNAL(triggered()), this, SLOT(createNode()));
     connect(ui->actionNew, SIGNAL(triggered()), this, SLOT(newGraph()));
     connect(ui->actionSave, SIGNAL(triggered()), this, SLOT(saveGraphToFile()));
     connect(ui->actionLoad_from_file, SIGNAL(triggered()), this, SLOT(loadGraphFromFile()));
 
+    connect(ui->graphicsView->scene(), SIGNAL(selectionChanged()), this, SLOT(updateMenu()));
 
     connect(ui->graphicsView, SIGNAL(removeNode(Node*)), &graph, SLOT(removeNode(Node*)));
     connect(ui->graphicsView, SIGNAL(removeEdge(Edge*)), &graph, SLOT(removeEdge(Edge*)));
@@ -27,19 +40,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->graphicsView, SIGNAL(createNode(QPointF)), this, SLOT(createNode(QPointF)));
 
     connect(this, SIGNAL(addNode(Node*)), &graph, SLOT(addNode(Node*)));
-
-    Node *war = new Node(QPointF(-180, -90),"Warszawa");
-    Node *wro = new Node(QPointF(180, 90), "Wroclaw");
-    //Edge *edge= new Edge(war, wro);
-
-    graph.addNode(war);
-    graph.addNode(wro);
-    graph.addEdgeByNodes(war, wro);
-
+    connect(this, SIGNAL(cleanGraph()), &graph, SLOT(eraseContents()));
     ui->graphicsView->scene()->addItem(new CoordinatesGrid());
-
-    ui->graphicsView->scene()->addItem(war);
-    ui->graphicsView->scene()->addItem(wro);
 }
 
 MainWindow::~MainWindow(){
@@ -54,7 +56,10 @@ void MainWindow::renameNode(Node* node){
     bool entered = false;
     QString cityName = QInputDialog::getText(this, "Edit City Name", "City Name", QLineEdit::Normal, node->getName(), &entered);
     if(entered){
-        node->setName(cityName);
+        if(!graph.isCityInGraph(cityName)){
+            node->setName(cityName);
+            emit graphEdited();
+        } // if cityName is in graph we can't update or it does not need update
     }
 }
 
@@ -63,18 +68,20 @@ void MainWindow::changeDistance(Edge* edge){
     double dist = QInputDialog::getDouble(this, "Edit Distance", "Distance", edge->getDistance(), 0., 2147483647., 6,  &entered);
     if(entered){
         edge->setDistance(dist);
+        emit graphEdited();
     }
 }
 
 void MainWindow::createNode(QPointF position){
     bool entered = true; // double function -> determines to end procedure if user resigned or node is added
     QString cityName = QInputDialog::getText(this, "Edit City Name", "City Name", QLineEdit::Normal, "", &entered);
-    if(true){ //TODO : validate name
-        entered = false;
-        emit addNode(new Node(position, cityName));
-    } else {
-        QMessageBox::warning(this, "ERROR", "City with that name exists");
-        cityName = QInputDialog::getText(this, "Edit City Name", "City Name", QLineEdit::Normal, "", &entered);
+    if(entered){
+        if(!graph.isCityInGraph(cityName)){
+            entered = false;
+            emit addNode(new Node(position, cityName));
+        } else {
+            QMessageBox::warning(this, "ERROR", "City with that name exists");
+        }
     }
 }
 
@@ -96,11 +103,49 @@ void MainWindow::saveGraphToFile(){
 
 void MainWindow::loadGraphFromFile(){
     QString userFilename = QFileDialog::getOpenFileName(this, "Open Document", QDir::currentPath(), "Graph files (*.gph)", nullptr);
+
+    {//TODO : delete demo block
+        Node *one = new Node(QPointF(21.07, -52.10),"Warszawa");
+        Node *two = new Node(QPointF(-118, -34.5), "Los Angeles");
+        Node *three = new Node(QPointF(139.24, -35.42), "Tokyo");
+        Node *four = new Node(QPointF(25.44, 28.12), "Pretoria");
+        Node *five = new Node(QPointF(149, 35.2), "Canberra");
+
+        emit addNode(one);
+        emit addNode(two);
+        emit addNode(three);
+        emit addNode(four);
+        emit addNode(five);
+
+        graph.addEdge(new Edge(one, two, 150));
+        graph.addEdge(new Edge(one, three, 320));
+        graph.addEdge(new Edge(one, four));
+        graph.addEdge(new Edge(three, five));
+    }
 }
 
 void MainWindow::newGraph(){
     //eventual save before
     emit cleanGraph();
+    emit graphEdited();
+}
+
+void MainWindow::updateMenu() {
+    auto selectedItems = ui->graphicsView->scene()->selectedItems();
+    if (selectedItems.size() != 0) {
+        auto item = selectedItems[0];
+        if(item->type() == Node::Type){
+            ui->stackedWidget->setCurrentIndex(1);
+            emit setActiveNode(static_cast<Node*>(item));
+        } else if(item->type() == Edge::Type){
+            ui->stackedWidget->setCurrentIndex(2);
+            emit setActiveEdge(static_cast<Edge*>(item));
+        } else { //if sth elese got selected
+            ui->stackedWidget->setCurrentIndex(0);
+        }
+    } else { //if nothing is selected
+        ui->stackedWidget->setCurrentIndex(0);
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event){

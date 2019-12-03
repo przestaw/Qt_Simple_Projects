@@ -23,6 +23,10 @@ public:
     int type() const override { return Type; }
 
     bool hasNode(Node *node);
+    bool connectsCity(QString city);
+
+    bool operator!=(Edge &other);
+    bool operator==(Edge &other);
 protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
 private:

@@ -1,7 +1,6 @@
 #include "graph.h"
-
-
 #include <QDebug>
+#include <algorithm>
 
 Graph::Graph(){}
 
@@ -12,12 +11,8 @@ Graph::~Graph(){
 void Graph::clearGraph(){
     std::for_each(edges.begin(), edges.end(), [](Edge *edge){ delete edge;});
     std::for_each(nodes.begin(), nodes.end(), [](Node *node){ delete node;});
-}
-
-void Graph::removeEdgeByNodes(Node *one, Node *two){
-    Q_UNUSED(one)
-    Q_UNUSED(two)
-    //TODO
+    edges.erase(edges.begin(), edges.end());
+    nodes.erase(nodes.begin(), nodes.end());
 }
 
 void Graph::removeEdge(Edge *edge){
@@ -26,33 +21,44 @@ void Graph::removeEdge(Edge *edge){
 }
 
 void Graph::removeEdges(Node *node){
-    auto begin = std::remove_if(edges.begin(), edges.end(), [node](Edge *edge){ return edge->hasNode(node);});
-    std::for_each(begin, edges.end(), [](Edge *edge){ delete edge;});
-    edges.erase(begin, edges.end());
+//    auto begin = std::remove_if(edges.begin(), edges.end(),
+//            [node](Edge *edge){ return edge->connectsCity(node->getName());});
+//    std::for_each(begin, edges.end(), [](Edge *edge){ delete edge;});
+//    edges.erase(begin, edges.end());
+    // void* T* are not move-assignable
+
+    for(long long int i = edges.size() - 1; i >= 0; --i){
+        if(edges[i]->hasNode(node)){
+            delete edges[i];
+            edges.erase(edges.begin() + i);
+        }
+    }
 }
 
 void Graph::removeNode(Node *node){
-    this->removeEdges(node);
-    nodes.erase(std::remove(nodes.begin(), nodes.end(), node), nodes.end());
     auto scene = node->scene();
+    this->removeEdges(node);
     delete node;
-    scene->invalidate();// to avoid artifacts after node deletion
-
-//    auto toDelete = std::find_if(nodes.begin(),nodes.end(), [node](Node *other){return node == other;});
-//    if(toDelete !=nodes.end()){
-//        nodes.erase(toDelete);
-//    }
+    nodes.erase(std::remove(nodes.begin(), nodes.end(), node), nodes.end());
+    scene->invalidate();// to avoid artifacts after node deletion //TODO : Signal?
 }
 
 void Graph::addNode(Node *node){
-    nodes.push_back(node);
-    emit createdNode(node);
+    if(!this->isCityInGraph(node->getName())){
+        nodes.push_back(node);
+        emit createdNode(node);
+    } else {
+        delete node;
+    }
 }
 
 void Graph::addEdge(Edge *edge){
-    //TODO avoid adding duplicates
-    edges.push_back(edge);
-    emit createdEdge(edge);
+    if(!isEdgeInGraph(edge)){
+        edges.push_back(edge);
+        emit createdEdge(edge);
+    } else {
+        delete edge;
+    }
 }
 
 void Graph::eraseContents(){
@@ -60,8 +66,9 @@ void Graph::eraseContents(){
 }
 
 void Graph::addEdgeByNodes(Node *one, Node *two){
-    //TODO chech if edge exists
-    Edge *edge = new Edge(one, two);
-    edges.push_back(edge);
-    emit createdEdge(edge);
+    if(!isEdgeInGraph(one, two) && isNodeInGraph(one) && isNodeInGraph(two)){
+        Edge *edge = new Edge(one, two);
+        edges.push_back(edge);
+        emit createdEdge(edge);
+    }
 }

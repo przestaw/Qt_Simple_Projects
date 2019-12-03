@@ -3,7 +3,7 @@
 const QColor Node::selectedColor = Qt::GlobalColor::green;
 const QColor Node::standardColor = Qt::GlobalColor::yellow;
 const QColor Node::borderColor = Qt::GlobalColor::black;
-const int Node::nodeRadius = 5;
+const int Node::nodeRadius = 6;
 
 Node::Node(QPointF pos, QString name): isMoving(false), name(name){
     this->setPos(pos);
@@ -62,17 +62,18 @@ void Node::setName(QString name){
 void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
     Q_UNUSED(option)
     Q_UNUSED(widget)
-
+    QFont font; font.setPointSizeF(5);
     QColor myColor;
-    if (isSelected())
+    if (isSelected()){
+        painter->setPen(QPen(borderColor, 1.4, Qt::SolidLine));
         myColor = selectedColor;
-    else
+    } else {
+        painter->setPen(QPen(borderColor, 0.8, Qt::SolidLine));
         myColor = standardColor;
-    painter->setPen(QPen(borderColor, 1, Qt::SolidLine));
+    }
     painter->setBrush(QBrush(myColor));
     painter->drawEllipse(-nodeRadius/2, -nodeRadius/2, nodeRadius, nodeRadius);
 
-    QFont font; font.setPointSizeF(5);
     painter->setFont(font);
     painter->drawText(-nodeRadius/2, 10 + nodeRadius/2, this->name);
 }

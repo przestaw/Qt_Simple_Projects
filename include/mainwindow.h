@@ -8,6 +8,8 @@
 #include <fstream>
 #include "graph.h"
 #include "graphview.h"
+#include "nodeprop.h"
+#include "edgeprop.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -29,14 +31,22 @@ public slots:
     void saveGraphToFile();
     void loadGraphFromFile();
     void newGraph();
+
+    void updateMenu();
 signals:
     void addNode(Node* node);
     void cleanGraph();
+    void setActiveEdge(Edge* edge);
+    void setActiveNode(Node* node);
+    void graphEdited();
 protected:
     void closeEvent(QCloseEvent *event);
 
 private:
     Ui::MainWindow *ui;
     Graph graph;
+
+    EdgeProp* edgeProp;
+    NodeProp* nodeProp;
 };
 #endif // MAINWINDOW_H

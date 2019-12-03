@@ -3,6 +3,7 @@
 
 #include "node.h"
 #include "edge.h"
+#include <memory>
 
 class Graph : public QObject
 {
@@ -10,7 +11,32 @@ class Graph : public QObject
 public:
     Graph();
     ~Graph();
-    bool checkNodeName(std::string name);
+
+    inline bool isCityInGraph (QString name){
+        return 0 != std::count_if(nodes.begin(),nodes.end(),
+                                   [name](Node* other){return name == other->getName();});
+    }
+
+    inline bool isNodeInGraph (Node* node){
+        return 0 != std::count_if(nodes.begin(),nodes.end(),
+                                   [node](Node* other){return node == other;});
+    }
+
+    inline bool isEdgeInGraph (QString one, QString two){
+        return 0 != std::count_if(edges.begin(),edges.end(),
+                                   [one, two](Edge* edge){return edge->connectsCity(one) && edge->connectsCity(two);});
+    }
+
+    inline bool isEdgeInGraph (Node* one, Node* two){
+        return 0 != std::count_if(edges.begin(),edges.end(),
+                                   [one, two](Edge* edge){return edge->hasNode(one) && edge->hasNode(two);});
+    }
+
+    inline bool isEdgeInGraph (Edge* edge){
+        return 0 != std::count_if(edges.begin(),edges.end(),
+                                   [edge](Edge* other){return *edge == *other;});
+    }
+
     /**
      * @brief addEdge adds edge to the graph if node one and two exist in the graph
      * @param one Node of the edge
@@ -18,12 +44,6 @@ public:
      */
     void addEdgeByNodes(Node *one, Node *two);
 public slots:
-    /**
-     * @brief removeEdge removes edge from graph if edge with that Nodes exists
-     * @param one Node of the edge
-     * @param two Node of the edge
-     */
-    void removeEdgeByNodes(Node *one, Node *two);
     /**
      * @brief removeEdge removes edge from graph if this edge exist
      * @param edge Edge to be removed
@@ -65,10 +85,6 @@ signals:
     void createdNode(Node* node);
 
 private:
-//    inline bool isNodeInGraph (Node& node){
-//        return 0 != std::count_if(nodes.begin(),nodes.end(),
-//                                   [&node](  Node& other){return false/*node.getName() == other.getName()*/;});
-//    }
     void clearGraph();
     std::vector<Node*> nodes;
     std::vector<Edge*> edges;
