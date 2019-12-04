@@ -73,8 +73,9 @@ void MainWindow::changeDistance(Edge* edge){
 }
 
 void MainWindow::createNode(QPointF position){
-    bool entered = true; // double function -> determines to end procedure if user resigned or node is added
+    bool entered = true;
     QString cityName = QInputDialog::getText(this, "Edit City Name", "City Name", QLineEdit::Normal, "", &entered);
+    QRegExp regExp("[a-zA-Z0-9]"); // TODO: not only white chars, not empty, only chars: a-zA-Z0-9
     if(entered){
         if(!graph.isCityInGraph(cityName)){
             entered = false;
