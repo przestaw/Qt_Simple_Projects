@@ -5,17 +5,19 @@ const QColor Node::standardColor = Qt::GlobalColor::yellow;
 const QColor Node::borderColor = Qt::GlobalColor::black;
 const int Node::nodeRadius = 6;
 
-Node::Node(QPointF pos, QString name): isMoving(false), name(name){
+Node::Node(QPointF pos, QString name): isMoving(false), name(name), font(){
     this->setPos(pos);
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setAcceptHoverEvents(true);
+    font.setPointSizeF(5);
 }
 
-Node::Node(QString name): isMoving(false), name(name){
+Node::Node(QString name): isMoving(false), name(name), font(){
     this->setPos(0,0);
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     //setFlag(QGraphicsItem::ItemIsMovable, true); // Does not work as desired
     setAcceptHoverEvents(true);
+    font.setPointSizeF(5);
 }
 
 void Node::hoverEnterEvent(QGraphicsSceneHoverEvent *event){
@@ -47,11 +49,24 @@ void Node::mouseReleaseEvent(QGraphicsSceneMouseEvent *event){
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
-QRectF Node::boundingRect() const
-{
-    return QRectF(-nodeRadius/2, -nodeRadius/2, nodeRadius, nodeRadius);
+QRectF Node::boundingRect() const{
+    QRect bound = QFontMetrics(font).boundingRect(name);
+    bound.moveBottomLeft(pos().toPoint() + QPoint(nodeRadius/2, nodeRadius/2));
+    return bound.united(QRect(-nodeRadius/2, -nodeRadius/2, nodeRadius, nodeRadius));
 }
 
+
+QPainterPath Node::shape() const {
+    QPainterPath path;
+    QRect bound = QRect(-nodeRadius/2, -nodeRadius/2, nodeRadius, nodeRadius);
+    path.addRect(bound);
+
+    QRect text = QFontMetrics(font).boundingRect(name);
+    text.moveBottomLeft(pos().toPoint() + QPoint(nodeRadius/2, nodeRadius/2));
+    path.addRect(text);
+
+    return path;
+}
 QString Node::getName() {
     return name;
 }
@@ -62,7 +77,6 @@ void Node::setName(QString name){
 void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget){
     Q_UNUSED(option)
     Q_UNUSED(widget)
-    QFont font; font.setPointSizeF(5);
     QColor myColor;
     if (isSelected()){
         painter->setPen(QPen(borderColor, 1.4, Qt::SolidLine));
@@ -75,5 +89,5 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->drawEllipse(-nodeRadius/2, -nodeRadius/2, nodeRadius, nodeRadius);
 
     painter->setFont(font);
-    painter->drawText(-nodeRadius/2, 10 + nodeRadius/2, this->name);
+    painter->drawText(nodeRadius/2, nodeRadius/2, this->name);
 }

@@ -14,7 +14,7 @@ public:
     Node(QPointF pos, QString name);
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
     QRectF boundingRect() const override;
-
+    QPainterPath shape() const override;
     enum { Type = UserType + 1 };
     int type() const override { return Type; }
     QString getName();
@@ -32,6 +32,7 @@ protected:
 private:
     bool isMoving;
     QString name;
+    QFont font;
 
     static const QColor selectedColor;
     static const QColor standardColor;

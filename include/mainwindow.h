@@ -14,12 +14,12 @@
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
-
-class MainWindow : public QMainWindow{
+//pusty pasek narzedziowy
+class GraphEditorWindow : public QMainWindow{
     Q_OBJECT
 public:
-    MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    GraphEditorWindow(QWidget *parent = nullptr);
+    ~GraphEditorWindow();
 
     GraphView* getProgramView();
 public slots:

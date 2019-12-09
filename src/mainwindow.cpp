@@ -5,7 +5,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
-MainWindow::MainWindow(QWidget *parent)
+GraphEditorWindow::GraphEditorWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow){
     ui->setupUi(this);
 
@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->graphicsView, SIGNAL(removeNode(Node*)), &graph, SLOT(removeNode(Node*)));
     connect(ui->graphicsView, SIGNAL(removeEdge(Edge*)), &graph, SLOT(removeEdge(Edge*)));
+    connect(ui->graphicsView, SIGNAL(removeEdges(Node*)), &graph, SLOT(removeEdges(Node*)));
 
     connect(&graph, &Graph::createdEdge, ui->graphicsView, &GraphView::addEdgeToScene);
     connect(ui->graphicsView, &GraphView::addEdge, &graph, &Graph::addEdge);
@@ -44,15 +45,15 @@ MainWindow::MainWindow(QWidget *parent)
     ui->graphicsView->scene()->addItem(new CoordinatesGrid());
 }
 
-MainWindow::~MainWindow(){
+GraphEditorWindow::~GraphEditorWindow(){
     delete ui;
 }
 
-GraphView *MainWindow::getProgramView(){
+GraphView *GraphEditorWindow::getProgramView(){
     return ui->graphicsView;
 }
 
-void MainWindow::renameNode(Node* node){
+void GraphEditorWindow::renameNode(Node* node){
     bool entered = false;
     QString cityName = QInputDialog::getText(this, "Edit City Name", "City Name", QLineEdit::Normal, node->getName(), &entered);
     if(entered){
@@ -63,7 +64,7 @@ void MainWindow::renameNode(Node* node){
     }
 }
 
-void MainWindow::changeDistance(Edge* edge){
+void GraphEditorWindow::changeDistance(Edge* edge){
     bool entered = false;
     double dist = QInputDialog::getDouble(this, "Edit Distance", "Distance", edge->getDistance(), 0., 2147483647., 6,  &entered);
     if(entered){
@@ -72,10 +73,10 @@ void MainWindow::changeDistance(Edge* edge){
     }
 }
 
-void MainWindow::createNode(QPointF position){
+void GraphEditorWindow::createNode(QPointF position){
     bool entered = true;
     QString cityName = QInputDialog::getText(this, "Edit City Name", "City Name", QLineEdit::Normal, "", &entered);
-    QRegExp regExp("[a-zA-Z0-9]"); // TODO: not only white chars, not empty, only chars: a-zA-Z0-9
+    //QRegExp regExp("[a-zA-Z0-9]"); // TODO: not only white chars, not empty, only chars: a-zA-Z0-9
     if(entered){
         if(!graph.isCityInGraph(cityName)){
             entered = false;
@@ -86,11 +87,11 @@ void MainWindow::createNode(QPointF position){
     }
 }
 
-void MainWindow::createNode(){
+void GraphEditorWindow::createNode(){
     this->createNode(QPointF(0,0));
 }
 
-void MainWindow::saveGraphToFile(){
+void GraphEditorWindow::saveGraphToFile(){
     QString newfilename;
     for (int i = 1; ; i++) {
         std::ifstream is(QDir::currentPath().toStdString() + "/graph" + std::to_string(i) + ".gph");
@@ -102,10 +103,11 @@ void MainWindow::saveGraphToFile(){
     QString userFilename = QFileDialog::getSaveFileName(this, "New Graph", newfilename, "Graph files (*.gph)",nullptr);
 }
 
-void MainWindow::loadGraphFromFile(){
+void GraphEditorWindow::loadGraphFromFile(){
     QString userFilename = QFileDialog::getOpenFileName(this, "Open Document", QDir::currentPath(), "Graph files (*.gph)", nullptr);
 
     {//TODO : delete demo block
+        emit cleanGraph();
         Node *one = new Node(QPointF(21.07, -52.10),"Warszawa");
         Node *two = new Node(QPointF(-118, -34.5), "Los Angeles");
         Node *three = new Node(QPointF(139.24, -35.42), "Tokyo");
@@ -125,13 +127,13 @@ void MainWindow::loadGraphFromFile(){
     }
 }
 
-void MainWindow::newGraph(){
+void GraphEditorWindow::newGraph(){
     //eventual save before
     emit cleanGraph();
     emit graphEdited();
 }
 
-void MainWindow::updateMenu() {
+void GraphEditorWindow::updateMenu() {
     auto selectedItems = ui->graphicsView->scene()->selectedItems();
     if (selectedItems.size() != 0) {
         auto item = selectedItems[0];
@@ -149,7 +151,7 @@ void MainWindow::updateMenu() {
     }
 }
 
-void MainWindow::closeEvent(QCloseEvent *event){
+void GraphEditorWindow::closeEvent(QCloseEvent *event){
     QMessageBox::StandardButton reply = QMessageBox::question(this, "Save Graph?",
                           "Your changes will be lost if you don't save them!",
                           QMessageBox::No|QMessageBox::Yes|QMessageBox::Cancel);

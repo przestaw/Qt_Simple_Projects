@@ -36,6 +36,7 @@ void GraphView::contextMenuEvent(QContextMenuEvent *event){
             menu.addAction("Re&name");
             menu.addSeparator();
             menu.addAction("&Set road to (Select other city by mouse)");
+            menu.addAction("&Izolate node (remove roads)");
             QAction *act = menu.exec(event->globalPos());
             if(act != nullptr){
                 if(act->text() == "&Delete"){
@@ -45,6 +46,8 @@ void GraphView::contextMenuEvent(QContextMenuEvent *event){
                 } else if(act->text().contains("&Set road to")){
                     isArcCreated = true;
                     arcFrom = static_cast<Node*>(item);
+                } else if(act->text() == "&Izolate node (remove roads)"){
+                    emit removeEdges(static_cast<Node*>(item));
                 }
             } else {
                 item->setSelected(false);
@@ -77,8 +80,6 @@ void GraphView::contextMenuEvent(QContextMenuEvent *event){
                 }
             }
         }
-    } else {
-        // ??
     }
 }
 

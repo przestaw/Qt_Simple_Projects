@@ -25,22 +25,28 @@ void Graph::removeEdges(Node *node){
 //            [node](Edge *edge){ return edge->connectsCity(node->getName());});
 //    std::for_each(begin, edges.end(), [](Edge *edge){ delete edge;});
 //    edges.erase(begin, edges.end());
-    // void* T* are not move-assignable
 
-    for(long long int i = edges.size() - 1; i >= 0; --i){
-        if(edges[i]->hasNode(node)){
-            delete edges[i];
-            edges.erase(edges.begin() + i);
+    for (auto &ptr: edges) {
+        if(ptr->hasNode(node)){
+            delete ptr;
+            ptr = nullptr;
         }
     }
+    edges.erase(std::remove(edges.begin(), edges.end(), nullptr), edges.end());
+
+
+//    for(long long int i = edges.size() - 1; i >= 0; --i){
+//        if(edges[i]->hasNode(node)){
+//            delete edges[i];
+//            edges.erase(edges.begin() + i);
+//        }
+//    }
 }
 
 void Graph::removeNode(Node *node){
-    auto scene = node->scene();
     this->removeEdges(node);
     delete node;
     nodes.erase(std::remove(nodes.begin(), nodes.end(), node), nodes.end());
-    scene->invalidate();// to avoid artifacts after node deletion //TODO : Signal?
 }
 
 void Graph::addNode(Node *node){

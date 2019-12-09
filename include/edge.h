@@ -30,6 +30,7 @@ public:
 protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
 private:
+    QFont font;
     Node *one;
     Node *two;
     double distance;

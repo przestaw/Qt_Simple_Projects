@@ -5,8 +5,7 @@
 #include "edge.h"
 #include <memory>
 
-class Graph : public QObject
-{
+class Graph : public QGraphicsScene{
     Q_OBJECT
 public:
     Graph();

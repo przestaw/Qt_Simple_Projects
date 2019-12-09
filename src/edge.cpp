@@ -1,21 +1,25 @@
 #include "edge.h"
 #include <QtMath>
 
-Edge::Edge(Node *one, Node *two, double distance) : one(one), two(two), distance(distance){
+Edge::Edge(Node *one, Node *two, double distance) : one(one), two(two), distance(distance), font(){
     this->setZValue(-1);
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setAcceptHoverEvents(true);
+    font.setPointSizeF(5);
 }
 
-Edge::Edge(Node *one, Node *two) : one(one), two(two){
+Edge::Edge(Node *one, Node *two) : one(one), two(two), font(){
     this->setZValue(-1);
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setAcceptHoverEvents(true);
     this->autoCalcDistance();
+    font.setPointSizeF(5);
 }
 
 QRectF Edge::boundingRect() const{
-    return QRectF(one->pos(), two->pos()).normalized();
+    QRectF bound = QRectF(one->pos(), two->pos()).normalized();
+    int margin = 5 * font.SizeResolved;
+    return QRectF(bound.topLeft()+QPointF(-margin,-margin),bound.bottomRight()+QPointF(margin,margin));
 }
 
 QPainterPath Edge::shape() const{
@@ -37,6 +41,11 @@ QPainterPath Edge::shape() const{
        .map(polygon);
 
     path.addPolygon(polygon);
+    QRect text = QFontMetrics(font).boundingRect(
+                QString().setNum(this->distance, 'g', 5));
+    text.moveBottomLeft(QPoint(line.center().toPoint()));
+
+    path.addRect(text);
     return path;
 }
 
@@ -44,7 +53,7 @@ void Edge::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     Q_UNUSED(option)
     Q_UNUSED(widget)
     QLineF line(one->pos(), two->pos());
-    QFont font; font.setPointSizeF(5);
+
     if (qFuzzyCompare(line.length(), qreal(0.)))
         return;
 
@@ -57,9 +66,10 @@ void Edge::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->drawLine(line);
     painter->setPen(QPen(Qt::black));
     painter->setFont(font);
-    QString txt = QString().setNum(this->distance, 'g', 5);//std::to_string(this->distance));
-    painter->drawText(this->boundingRect().center(), txt);
-    //painter->drawPolyline(shape().toFillPolygon());
+    QString txt = QString().setNum(this->distance, 'g', 4);//std::to_string(this->distance));
+    painter->drawText(QLineF(one->pos(),two->pos()).center(), txt);
+
+    //painter->drawRect(boundingRect());
 }
 
 double Edge::getDistance(){

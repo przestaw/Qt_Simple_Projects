@@ -23,8 +23,7 @@ signals:
     void addNode(Node* node);
     void removeNode(Node* node);
     void removeEdge(Edge* edge);
-    //check why it can't be
-    void addEdgeByNodes(Node* one, Node* two);
+    void removeEdges(Node* node);
 
     void renameNode(Node* node);
     void changeDist(Edge* edge);
