@@ -8,23 +8,14 @@
 #include <QMouseEvent>
 #include "edge.h"
 #include "node.h"
+#include <QSvgRenderer>
 
 class GraphView : public QGraphicsView{
     Q_OBJECT
 public:
     GraphView(QWidget *parent = nullptr);
 
-public slots:
-    void addEdgeToScene(Edge *edge);
-    void addNodeToScene(Node *node);
-    void invalidateScene();
 signals:
-    void addEdge(Edge* edge);
-    void addNode(Node* node);
-    void removeNode(Node* node);
-    void removeEdge(Edge* edge);
-    void removeEdges(Node* node);
-
     void renameNode(Node* node);
     void changeDist(Edge* edge);
     void createNode(QPointF pos);
@@ -35,7 +26,10 @@ protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
+    void drawBackground(QPainter *painter, const QRectF &rect);
 private:
+
+    QSvgRenderer rend;
     Node* arcFrom;
     bool isArcCreated;
 };

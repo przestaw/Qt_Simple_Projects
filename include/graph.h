@@ -70,21 +70,11 @@ public slots:
      */
     void addEdge(Edge *edge);
 
-    void eraseContents();
-signals:
-    /**
-     * @brief createdEdge triggerd to allow newly created edge to be displayed
-     * @param edge edge created and allocated in graph
-     */
-    void createdEdge(Edge* edge);
-    /**
-     * @brief createdNode
-     * @param node
-     */
-    void createdNode(Node* node);
+public:
 
-private:
     void clearGraph();
+private:
+
     std::vector<Node*> nodes;
     std::vector<Edge*> edges;
 };

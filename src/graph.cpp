@@ -1,6 +1,7 @@
 #include "graph.h"
 #include <QDebug>
 #include <algorithm>
+#include <QGraphicsSvgItem>
 
 Graph::Graph(){}
 
@@ -33,14 +34,6 @@ void Graph::removeEdges(Node *node){
         }
     }
     edges.erase(std::remove(edges.begin(), edges.end(), nullptr), edges.end());
-
-
-//    for(long long int i = edges.size() - 1; i >= 0; --i){
-//        if(edges[i]->hasNode(node)){
-//            delete edges[i];
-//            edges.erase(edges.begin() + i);
-//        }
-//    }
 }
 
 void Graph::removeNode(Node *node){
@@ -52,7 +45,7 @@ void Graph::removeNode(Node *node){
 void Graph::addNode(Node *node){
     if(!this->isCityInGraph(node->getName())){
         nodes.push_back(node);
-        emit createdNode(node);
+        addItem(node);
     } else {
         delete node;
     }
@@ -61,20 +54,16 @@ void Graph::addNode(Node *node){
 void Graph::addEdge(Edge *edge){
     if(!isEdgeInGraph(edge)){
         edges.push_back(edge);
-        emit createdEdge(edge);
+        addItem(edge);
     } else {
         delete edge;
     }
-}
-
-void Graph::eraseContents(){
-    this->clearGraph();
 }
 
 void Graph::addEdgeByNodes(Node *one, Node *two){
     if(!isEdgeInGraph(one, two) && isNodeInGraph(one) && isNodeInGraph(two)){
         Edge *edge = new Edge(one, two);
         edges.push_back(edge);
-        emit createdEdge(edge);
+        addItem(edge);
     }
 }

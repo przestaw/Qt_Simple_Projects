@@ -7,8 +7,7 @@
 #include <QGraphicsView>
 #include <QGraphicsItem>
 
-class Node : public QGraphicsItem
-{
+class Node : public QGraphicsItem{
 public:
     Node(QString name);
     Node(QPointF pos, QString name);
@@ -19,11 +18,6 @@ public:
     int type() const override { return Type; }
     QString getName();
     void setName(QString name);
-signals:
-
-public slots:
-
-
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;

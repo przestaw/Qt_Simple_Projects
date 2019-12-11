@@ -2,23 +2,12 @@
 #include "node.h"
 #include "edge.h"
 #include "coordinatesgrid.h"
+#include "graph.h"
 
 
-GraphView::GraphView(QWidget *parent) : QGraphicsView(parent), arcFrom(nullptr), isArcCreated(false){
-    QGraphicsScene *scene = new QGraphicsScene(this);
-    this->setScene(scene);
-}
-
-void GraphView::addEdgeToScene(Edge *edge){
-    this->scene()->addItem(edge);
-}
-
-void GraphView::addNodeToScene(Node *node){
-    this->scene()->addItem(node);
-}
-
-void GraphView::invalidateScene(){
-    this->scene()->invalidate();
+GraphView::GraphView(QWidget *parent) : QGraphicsView(parent), arcFrom(nullptr), isArcCreated(false), rend(QString(":/world"), this){
+    setScene(new Graph());
+    scene()->addItem(new CoordinatesGrid());
 }
 
 void GraphView::contextMenuEvent(QContextMenuEvent *event){
@@ -40,14 +29,14 @@ void GraphView::contextMenuEvent(QContextMenuEvent *event){
             QAction *act = menu.exec(event->globalPos());
             if(act != nullptr){
                 if(act->text() == "&Delete"){
-                    emit removeNode(static_cast<Node*>(item));
+                    static_cast<Graph*>(scene())->removeNode(static_cast<Node*>(item));
                 } else if(act->text() == "Re&name"){
                     emit renameNode(static_cast<Node*>(item));
                 } else if(act->text().contains("&Set road to")){
                     isArcCreated = true;
                     arcFrom = static_cast<Node*>(item);
                 } else if(act->text() == "&Izolate node (remove roads)"){
-                    emit removeEdges(static_cast<Node*>(item));
+                    static_cast<Graph*>(scene())->removeEdges(static_cast<Node*>(item));
                 }
             } else {
                 item->setSelected(false);
@@ -60,7 +49,7 @@ void GraphView::contextMenuEvent(QContextMenuEvent *event){
             QAction *act = menu.exec(event->globalPos());
             if(act != nullptr){
                 if(act->text() == "&Delete"){
-                    emit removeEdge(dynamic_cast<Edge*>(item));
+                    static_cast<Graph*>(scene())->removeEdge(dynamic_cast<Edge*>(item));
                 } else if(act->text() == "&Change/Set Distance"){
                     emit changeDist(static_cast<Edge*>(item));
                 } else if (act->text() == "&Auto-Calc Distance"){
@@ -91,7 +80,7 @@ void GraphView::mousePressEvent(QMouseEvent *event){
                 Node* arcTo = static_cast<Node*>(clickedItems[0]);
                 if(arcTo != arcFrom){
                     Edge *edge = new Edge(arcTo, arcFrom);
-                    emit addEdge(edge);
+                    static_cast<Graph*>(scene())->addEdge(edge);
                 }
             }
         }
@@ -107,8 +96,16 @@ void GraphView::mouseReleaseEvent(QMouseEvent *event) {
 }
 
 void GraphView::resizeEvent(QResizeEvent *event){
-    QRectF rect = QRectF(-180, -90, 360, 180);
+    QRectF rect = QRectF(-180, -90, 360, 180); // to acomodate svg
     fitInView(rect, Qt::KeepAspectRatio);
     this->scene()->setSceneRect(rect);
     event->accept();
+}
+
+void GraphView::drawBackground(QPainter *painter, const QRectF &rect){
+    Q_UNUSED(rect);
+    painter->setPen(QPen(Qt::white, 0, Qt::NoPen));
+    painter->setBrush(QBrush(Qt::lightGray));
+    painter->drawRect(QRectF(-180, -90, 360, 180));
+    //rend.render(painter, QRectF(-174, -93, 370.7, 186));
 }

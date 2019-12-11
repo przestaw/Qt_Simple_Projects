@@ -17,9 +17,13 @@ Edge::Edge(Node *one, Node *two) : one(one), two(two), font(){
 }
 
 QRectF Edge::boundingRect() const{
+    QRectF text = QFontMetrics(font).boundingRect(
+                QString().setNum(this->distance, 'g', 4));
     QRectF bound = QRectF(one->pos(), two->pos()).normalized();
-    int margin = 5 * font.SizeResolved;
-    return QRectF(bound.topLeft()+QPointF(-margin,-margin),bound.bottomRight()+QPointF(margin,margin));
+    int margin = text.width();
+    //text will always be on top, bottom or left [depending on orientation]
+    return QRectF(bound.topLeft()+QPointF(-3,-margin),
+                  bound.bottomRight()+QPointF(margin,margin));
 }
 
 QPainterPath Edge::shape() const{
@@ -29,10 +33,11 @@ QPainterPath Edge::shape() const{
     QPointF center = line.center();
     double lenght = line.length()/2;
 
-    polygon << center + QPointF(-lenght, 2.2);
-    polygon << center + QPointF(-lenght, -2.2);
-    polygon << center + QPointF(lenght, -2.2);
-    polygon << center + QPointF(lenght, 2.2);
+    polygon << center + QPointF(lenght, 3);
+    polygon << center + QPointF(lenght, -3);
+    polygon << center + QPointF(-lenght, -3);
+    polygon << center + QPointF(-lenght, 3);
+
 
     polygon = QTransform()
        .translate(center.x(), center.y())
@@ -41,10 +46,10 @@ QPainterPath Edge::shape() const{
        .map(polygon);
 
     path.addPolygon(polygon);
-    QRect text = QFontMetrics(font).boundingRect(
-                QString().setNum(this->distance, 'g', 5));
-    text.moveBottomLeft(QPoint(line.center().toPoint()));
 
+    QRect text = QFontMetrics(font).boundingRect(
+                QString().setNum(this->distance, 'g', 4));
+    text.moveBottomLeft(QPoint(line.center().toPoint()));
     path.addRect(text);
     return path;
 }
@@ -58,7 +63,7 @@ void Edge::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
         return;
 
     if(this->isSelected()){
-         painter->setPen(QPen(Qt::red, 1.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+         painter->setPen(QPen(Qt::red, 1.2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     } else {
         painter->setPen(QPen(Qt::red, 0.5, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     }
@@ -66,10 +71,13 @@ void Edge::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->drawLine(line);
     painter->setPen(QPen(Qt::black));
     painter->setFont(font);
-    QString txt = QString().setNum(this->distance, 'g', 4);//std::to_string(this->distance));
+    QString txt = QString().setNum(this->distance, 'g', 4);
     painter->drawText(QLineF(one->pos(),two->pos()).center(), txt);
 
-    //painter->drawRect(boundingRect());
+//    painter->setPen(QPen(Qt::green, 1.4, Qt::SolidLine));
+//    painter->drawPolyline(this->shape().toFillPolygon());
+//    painter->setPen(QPen(Qt::blue, 1.4, Qt::SolidLine));
+//    painter->drawPolygon(this->boundingRect());
 }
 
 double Edge::getDistance(){

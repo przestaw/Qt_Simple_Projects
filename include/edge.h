@@ -5,8 +5,7 @@
 #include <QGraphicsItem>
 #include "node.h"
 
-class Edge : public QGraphicsItem
-{
+class Edge : public QGraphicsItem {
 public:
     Edge(Node *one, Node *two, double distance);
     Edge(Node *one, Node *two);
@@ -25,8 +24,8 @@ public:
     bool hasNode(Node *node);
     bool connectsCity(QString city);
 
-    bool operator!=(Edge &other);
     bool operator==(Edge &other);
+    bool operator!=(Edge &other);
 protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
 private:

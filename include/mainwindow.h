@@ -34,17 +34,14 @@ public slots:
 
     void updateMenu();
 signals:
-    void addNode(Node* node);
-    void cleanGraph();
     void setActiveEdge(Edge* edge);
     void setActiveNode(Node* node);
-    void graphEdited();
+
 protected:
     void closeEvent(QCloseEvent *event);
-
 private:
     Ui::MainWindow *ui;
-    Graph graph;
+    Graph* graph();
 
     EdgeProp* edgeProp;
     NodeProp* nodeProp;
