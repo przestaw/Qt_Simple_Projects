@@ -1,6 +1,7 @@
 #include "nodeprop.h"
 
-NodeProp::NodeProp(Graph* graph): graph(graph) {
+NodeProp::NodeProp(Graph* graph)
+    : graph(graph), activeNode(nullptr) {
     cityNameLab = new QLabel("City name");
     longitudeLab = new QLabel("Longitude [+ = E, - = W]");
     latitudeLab = new QLabel("Latitude [+ = N, - = S]");

@@ -1,7 +1,8 @@
 #include "edge.h"
 #include <QtMath>
 
-Edge::Edge(Node *one, Node *two, double distance) : one(one), two(two), distance(distance), font(){
+Edge::Edge(Node *one, Node *two, double distance)
+    : one(one), two(two), distance(distance), font() {
     this->setZValue(-1);
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setAcceptHoverEvents(true);

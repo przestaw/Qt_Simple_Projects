@@ -19,13 +19,14 @@ set(RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/res/world.qrc)
 
 QT5_ADD_RESOURCES(RESOURCE_ADDED ${RESOURCES})
 
+set(RESOURCE_ADDED ${RESOURCE_ADDED} PARENT_SCOPE)
+
 set(HEADERS
     include/mainwindow.h
     include/node.h
     include/edge.h
     include/graphview.h
     include/graph.h
-    include/coordinatesgrid.h
     include/nodeprop.h
     include/edgeprop.h
     )
@@ -37,7 +38,6 @@ set(SOURCES
     src/edge.cpp
     src/graphview.cpp
     src/graph.cpp
-    src/coordinatesgrid.cpp
     src/nodeprop.cpp
     src/edgeprop.cpp
     )
@@ -52,6 +52,6 @@ add_executable(QTwidget
 
 target_link_libraries(QTwidget PRIVATE Qt5::Widgets Qt5::Svg)
 
-set(RESOURCE_ADDED ${RESOURCE_ADDED} PARENT_SCOPE)
+
 
 #set_source_files_properties(${RESOURCE_ADDED} PROPERTIES GENERATED ON)

@@ -14,14 +14,13 @@
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
-//pusty pasek narzedziowy
 class GraphEditorWindow : public QMainWindow{
     Q_OBJECT
 public:
     GraphEditorWindow(QWidget *parent = nullptr);
     ~GraphEditorWindow();
 
-    GraphView* getProgramView();
+    GraphView* getGraphicsView();
 public slots:
     void renameNode(Node* node);
     void changeDistance(Edge* edge);
@@ -36,7 +35,6 @@ public slots:
 signals:
     void setActiveEdge(Edge* edge);
     void setActiveNode(Node* node);
-
 protected:
     void closeEvent(QCloseEvent *event);
 private:

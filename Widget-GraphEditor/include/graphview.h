@@ -14,13 +14,10 @@ class GraphView : public QGraphicsView{
     Q_OBJECT
 public:
     GraphView(QWidget *parent = nullptr);
-
 signals:
     void renameNode(Node* node);
     void changeDist(Edge* edge);
     void createNode(QPointF pos);
-
-    void nodePosChanged(Node* node); //TODO
 protected:
     void contextMenuEvent(QContextMenuEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
@@ -28,10 +25,10 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
     void drawBackground(QPainter *painter, const QRectF &rect);
 private:
-
     QSvgRenderer rend;
     Node* arcFrom;
-    bool isArcCreated;
+    bool isArcCreated;  
+    QRectF rectSpace;
 };
 
 #endif // GRAPHVIEW_H

@@ -5,7 +5,8 @@ const QColor Node::standardColor = Qt::GlobalColor::yellow;
 const QColor Node::borderColor = Qt::GlobalColor::black;
 const int Node::nodeRadius = 5;
 
-Node::Node(QPointF pos, QString name): isMoving(false), name(name), font(){
+Node::Node(QPointF pos, QString name)
+    : isMoving(false), name(name), font(){
     this->setPos(pos);
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setAcceptHoverEvents(true);
@@ -13,7 +14,8 @@ Node::Node(QPointF pos, QString name): isMoving(false), name(name), font(){
 
 }
 
-Node::Node(QString name): isMoving(false), name(name), font(){
+Node::Node(QString name)
+    : isMoving(false), name(name), font(){
     this->setPos(0,0);
     setFlag(QGraphicsItem::ItemIsSelectable, true);
     setAcceptHoverEvents(true);
@@ -51,7 +53,7 @@ void Node::mouseReleaseEvent(QGraphicsSceneMouseEvent *event){
 
 QRectF Node::boundingRect() const{
     QRect bound = QFontMetrics(font).boundingRect(name);
-    bound.moveTopLeft(QPoint(nodeRadius, -nodeRadius/2));
+    bound.moveTopLeft(QPoint(nodeRadius, -nodeRadius));
     return bound.united(QRect(-nodeRadius/2, -nodeRadius/2, nodeRadius, nodeRadius));
 }
 
@@ -60,9 +62,10 @@ QPainterPath Node::shape() const {
     QPainterPath path;
     path.addEllipse(-nodeRadius/2, -nodeRadius/2, nodeRadius, nodeRadius);
 
-    QRect text = QFontMetrics(font).boundingRect(name);
-    text.moveLeft(nodeRadius/2);
-    path.addRect(text);
+    //text should not be clickable in case of Node !
+//    QRect text = QFontMetrics(font).boundingRect(name);
+//    text.moveLeft(nodeRadius/2);
+//    path.addRect(text);
 
     return path;
 }
@@ -88,5 +91,5 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->drawEllipse(-nodeRadius/2, -nodeRadius/2, nodeRadius, nodeRadius);
 
     painter->setFont(font);
-    painter->drawText(nodeRadius/2, nodeRadius, this->name);
+    painter->drawText(nodeRadius, nodeRadius, this->name);
 }

@@ -1,7 +1,8 @@
 #include "edgeprop.h"
 #include <limits>
 
-EdgeProp::EdgeProp(): activeEdge(nullptr) {
+EdgeProp::EdgeProp()
+    : activeEdge(nullptr) {
     label = new QLabel("Distance");
     distance = new QDoubleSpinBox();
     distance->setRange(0, std::numeric_limits<double>::max());

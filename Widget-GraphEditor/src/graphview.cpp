@@ -1,13 +1,18 @@
 #include "graphview.h"
 #include "node.h"
 #include "edge.h"
-#include "coordinatesgrid.h"
 #include "graph.h"
 
 
-GraphView::GraphView(QWidget *parent) : QGraphicsView(parent), arcFrom(nullptr), isArcCreated(false), rend(QString(":/world"), this){
+GraphView::GraphView(QWidget *parent)
+    : QGraphicsView(parent), arcFrom(nullptr), isArcCreated(false),
+      rend(QString(":/world"), this), rectSpace(-180, -90, 360, 180) {
     setScene(new Graph());
-    scene()->addItem(new CoordinatesGrid());
+    //below to take use of size preferences
+    QGraphicsRectItem *gridSpacer = new QGraphicsRectItem(rectSpace);
+    gridSpacer->setPen(QPen(Qt::white, 0, Qt::NoPen));
+    gridSpacer->setZValue(-3);
+    scene()->addItem(gridSpacer);
 }
 
 void GraphView::contextMenuEvent(QContextMenuEvent *event){
@@ -59,13 +64,14 @@ void GraphView::contextMenuEvent(QContextMenuEvent *event){
             } else {
                 item->setSelected(false);
             }
-        } else if(item->type() == CoordinatesGrid::Type){
+        } else if(item->type() == QGraphicsRectItem::Type){
+            //spaceRect ?
             QMenu menu;
             menu.addAction("&New node here");
             QAction *act = menu.exec(event->globalPos());
             if(act != nullptr){
                 if (act->text() == "&New node here"){
-                    emit createNode(mapToScene(event->pos()));
+                        emit createNode(mapToScene(event->pos()));
                 }
             }
         }
@@ -91,7 +97,7 @@ void GraphView::mousePressEvent(QMouseEvent *event){
 }
 
 void GraphView::mouseReleaseEvent(QMouseEvent *event) {
-    scene()->invalidate(); //to recalc Edge Rect after draging !!
+    scene()->invalidate(); //to repaint edges under bounding rect of nodes
     QGraphicsView::mouseReleaseEvent(event);
 }
 
@@ -105,7 +111,19 @@ void GraphView::resizeEvent(QResizeEvent *event){
 void GraphView::drawBackground(QPainter *painter, const QRectF &rect){
     Q_UNUSED(rect);
     painter->setPen(QPen(Qt::white, 0, Qt::NoPen));
-    painter->setBrush(QBrush(Qt::lightGray));
-    painter->drawRect(QRectF(-180, -90, 360, 180));
+    painter->setBrush(QBrush(QColor(170, 200, 180)));
+    painter->drawRect(rectSpace);
+
     //rend.render(painter, QRectF(-174, -93, 370.7, 186));
+
+    painter->setPen(QPen(Qt::blue, 0.3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+
+    QVector<QLineF> lines;
+    for(int i = -90; i <= 90; i+=10){
+        lines.push_back(QLineF(180, i, -180, i));
+    }
+    for(int i = -180; i <= 180; i+=10){
+        lines.push_back(QLineF( i, -90, i, 90));
+    }
+    painter->drawLines(lines);
 }

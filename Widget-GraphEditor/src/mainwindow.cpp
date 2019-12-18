@@ -33,7 +33,7 @@ GraphEditorWindow::~GraphEditorWindow(){
     delete ui;
 }
 
-GraphView *GraphEditorWindow::getProgramView(){
+GraphView *GraphEditorWindow::getGraphicsView(){
     return ui->graphicsView;
 }
 
@@ -121,11 +121,11 @@ void GraphEditorWindow::updateMenu() {
     if (selectedItems.size() != 0) {
         auto item = selectedItems[0];
         if(item->type() == Node::Type){
-            ui->stackedWidget->setCurrentIndex(1);
             nodeProp->setActiveNode(static_cast<Node*>(item));
+            ui->stackedWidget->setCurrentIndex(1);
         } else if(item->type() == Edge::Type){
-            ui->stackedWidget->setCurrentIndex(2);
             edgeProp->setActiveEdge(static_cast<Edge*>(item));
+            ui->stackedWidget->setCurrentIndex(2);
         } else { //if sth elese got selected
             ui->stackedWidget->setCurrentIndex(0);
         }
