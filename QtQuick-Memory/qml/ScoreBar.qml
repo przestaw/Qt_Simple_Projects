@@ -1,6 +1,6 @@
-import QtQuick.Controls 2.5
-import QtQuick.Window 2.10
-import QtQuick 2.10
+import QtQuick.Controls 2.0
+import QtQuick.Window 2.0
+import QtQuick 2.0
 
 Rectangle {
     id: scoreBar

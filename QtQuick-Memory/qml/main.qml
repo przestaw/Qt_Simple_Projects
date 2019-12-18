@@ -1,6 +1,6 @@
-import QtQuick.Controls 2.5
-import QtQuick.Window 2.10
-import QtQuick 2.10
+import QtQuick.Controls 2.0
+import QtQuick.Window 2.0
+import QtQuick 2.0
 
 Window {
     id: root
@@ -10,27 +10,7 @@ Window {
     color: "lightgray"
     title: qsTr("Memory Game")
 
-    property int selectedCard1: -1
-    property int selectedCard2: -1
-    property int scorePlayer1: 0
-    property int scorePlayer2: 0
-    property bool playing: true
-    property bool restart: false
-    property bool playerOne: true
     property int basicFontSize: root.width/75
-
-    Behavior on scorePlayer1 {
-        PropertyAnimation {
-            easing.type: Easing.InQuad
-            duration: 350
-        }
-    }
-    Behavior on scorePlayer2 {
-        PropertyAnimation {
-            easing.type: Easing.InQuad
-            duration: 350
-        }
-    }
 
     TopLabel {
         id: topLabel
@@ -41,6 +21,28 @@ Window {
 
     Grid {
         id: cardsGrid
+
+        property int selectedCard1: -1
+        property int selectedCard2: -1
+        property int scorePlayer1: 0
+        property int scorePlayer2: 0
+        property bool playing: true
+        property bool restart: false
+        property bool playerOne: true
+
+        Behavior on scorePlayer1 {
+            PropertyAnimation {
+                easing.type: Easing.InQuad
+                duration: 350
+            }
+        }
+        Behavior on scorePlayer2 {
+            PropertyAnimation {
+                easing.type: Easing.InQuad
+                duration: 350
+            }
+        }
+
         property var cardsModel: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" ,"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"]
         property var cardSize: (parent.width/10 > verticalSpace/6) ? verticalSpace/6 : parent.width/10
         property var verticalSpace: parent.height - 3 * basicFontSize*2 - 2 * bottomBar.height
@@ -56,19 +58,20 @@ Window {
         columnSpacing: parent.width/20
 
         Repeater {
+            id: repeaterCards
             model: parent.cardsModel
             delegate: Card {
                 letter: modelData
                 width: parent.cardSize
                 onSelected: {
-                    if (selectedCard1 >= 0 && selectedCard2 >= 0) {
+                    if (cardsGrid.selectedCard1 >= 0 && cardsGrid.selectedCard2 >= 0) {
                         checkTimer.stop();
-                        root.checkGame();
+                        cardsGrid.checkGame();
                     }
-                    if (selectedCard1 < 0) {
-                        selectedCard1 = index;
+                    if (cardsGrid.selectedCard1 < 0) {
+                        cardsGrid.selectedCard1 = index;
                     } else {
-                        selectedCard2 = index;
+                        cardsGrid.selectedCard2 = index;
                         checkTimer.start();
                     }
                 }
@@ -78,35 +81,35 @@ Window {
         states: [
             State {
                 name: "level"
-                when: !playing & !restart
+                when: !cardsGrid.playing & !cardsGrid.restart
                 PropertyChanges {
                     target: cardsGrid
                     visible: false
                 }
                 PropertyChanges {
                     target: topLabel
-                    label: (scorePlayer1 == scorePlayer2) ?
-                               "Draw !" : (scorePlayer1 < scorePlayer2) ?
+                    label: (cardsGrid.scorePlayer1 == cardsGrid.scorePlayer2) ?
+                               "Draw !" : (cardsGrid.scorePlayer1 < cardsGrid.scorePlayer2) ?
                                    "Player 2 won!" : "Player 1 won!"
-                    color: (scorePlayer1 == scorePlayer2) ?
-                               "white" : (scorePlayer1 < scorePlayer2) ?
+                    color: (cardsGrid.scorePlayer1 == cardsGrid.scorePlayer2) ?
+                               "white" : (cardsGrid.scorePlayer1 < cardsGrid.scorePlayer2) ?
                                    "red" : "blue"
                 }
                 PropertyChanges {
                     target: topLabel
-                    labelColor: (scorePlayer1 == scorePlayer2) ? "black" : "white"
+                    labelColor: (cardsGrid.scorePlayer1 == cardsGrid.scorePlayer2) ? "black" : "white"
                 }
                 PropertyChanges {
                     target: bottomBar
                     label: "Start New Game !"
-                    color: (scorePlayer1 == scorePlayer2) ?
-                               "white" : (scorePlayer1 < scorePlayer2) ?
+                    color: (cardsGrid.scorePlayer1 == cardsGrid.scorePlayer2) ?
+                               "white" : (cardsGrid.scorePlayer1 < cardsGrid.scorePlayer2) ?
                                    "red" : "blue"
                 }
             },
             State {
                 name: "restart"
-                when: !playing & restart
+                when: !cardsGrid.playing & cardsGrid.restart
                 PropertyChanges {
                     target: cardsGrid
                     visible: false
@@ -120,7 +123,7 @@ Window {
             },
             State {                
                 name: "player1"
-                when: playing && playerOne
+                when: cardsGrid.playing && cardsGrid.playerOne
                 PropertyChanges {
                     target: cardsGrid
                     visible: true
@@ -132,13 +135,13 @@ Window {
                 }
                 PropertyChanges {
                     target: bottomBar
-                    label: "Score : " + scorePlayer1
+                    label: "Score : " + cardsGrid.scorePlayer1
                     color: "blue"
                 }
             },
             State {
                 name: "player2"
-                when: playing && !playerOne
+                when: cardsGrid.playing && !cardsGrid.playerOne
                 PropertyChanges {
                     target: cardsGrid
                     visible: true
@@ -150,7 +153,7 @@ Window {
                 }
                 PropertyChanges {
                     target: bottomBar
-                    label: "Score : " + scorePlayer2
+                    label: "Score : " + cardsGrid.scorePlayer2
                     color: "red"
                 }
             }
@@ -186,8 +189,36 @@ Window {
               j = Math.floor(Math.random() * (i + 1)); // random index from 0 to i
               [array[i], array[j]] = [array[j], array[i]];
             }
-            cardsModel = array; scorePlayer1 = scorePlayer2 = 0;
-            root.restart = false; root.playing = true;
+            repeaterCards.model = array; cardsGrid.scorePlayer1 = cardsGrid.scorePlayer2 = 0;
+            cardsGrid.restart = false; cardsGrid.playing = true;
+        }
+
+        Timer {
+            id: checkTimer
+            interval: 1000
+            onTriggered: cardsGrid.checkGame()
+        }
+
+        function checkGame(){
+            if (cardsGrid.children[selectedCard1].letter
+                    == cardsGrid.children[selectedCard2].letter) {
+                cardsGrid.children[selectedCard1].opacity = cardsGrid.children[selectedCard2].opacity = 0.2
+                addPoint()
+            } else {
+                cardsGrid.children[selectedCard1].flipped = cardsGrid.children[selectedCard2].flipped = false
+                playerOne = !playerOne
+            }
+            selectedCard1 = selectedCard2 = -1;
+        }
+
+        function addPoint(){
+            if(scorePlayer1 + scorePlayer2 == 55)
+                playing = false;
+            if(playerOne)
+                scorePlayer1 += 5;
+            else
+                scorePlayer2 += 5;
+
         }
     }
 
@@ -205,7 +236,7 @@ Window {
             font.pixelSize: basicFontSize*1.5; font.family: "Heveltica"; font.bold: true
             height: basicFontSize*3; width: text.length*font.pixelSize
             onPressed: {
-                root.playing = false; root.restart = true
+                cardsGrid.playing = false; cardsGrid.restart = true
                 cardsGrid.restartGame()
             }
         }
@@ -219,33 +250,5 @@ Window {
                 Qt.quit()
             }
         }
-    }
-
-    Timer {
-        id: checkTimer
-        interval: 1000
-        onTriggered: checkGame()
-    }
-
-    function checkGame(){
-        if (cardsGrid.children[selectedCard1].letter
-                == cardsGrid.children[selectedCard2].letter) {
-            cardsGrid.children[selectedCard1].opacity = cardsGrid.children[selectedCard2].opacity = 0.2
-            addPoint()
-        } else {
-            cardsGrid.children[selectedCard1].flipped = cardsGrid.children[selectedCard2].flipped = false
-            playerOne = !playerOne
-        }
-        selectedCard1 = selectedCard2 = -1;
-    }
-
-    function addPoint(){
-        if(scorePlayer1 + scorePlayer2 == 55)
-            playing = false;
-        if(playerOne)
-            scorePlayer1 += 5;
-        else
-            scorePlayer2 += 5;
-
     }
 }
