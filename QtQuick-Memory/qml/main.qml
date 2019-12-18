@@ -6,11 +6,11 @@ Window {
     id: root
     visible: true
     width: 900
-    height: 700
+    height: 600
     color: "lightgray"
     title: qsTr("Memory Game")
 
-    property int basicFontSize: root.width/75
+    property int basicFontSize: (root.width/75 < root.height/54) ? root.width/75 : root.height/54
 
     TopLabel {
         id: topLabel
@@ -19,16 +19,26 @@ Window {
         basicSize: basicFontSize * 2
     }
 
-    Grid {
+    CardsGrid {
         id: cardsGrid
+        anchors.left: parent.left
+        anchors.top: topLabel.bottom
+        anchors.leftMargin: (parent.width - cardSize*columns - columnSpacing*(columns-1) ) / 2
+        anchors.topMargin: basicFontSize * 4
 
-        property int selectedCard1: -1
-        property int selectedCard2: -1
-        property int scorePlayer1: 0
-        property int scorePlayer2: 0
-        property bool playing: true
-        property bool restart: false
-        property bool playerOne: true
+        horizontalSpace: parent.width
+        verticalSpace: parent.height - 2 * anchors.topMargin - 2 * bottomBar.height
+
+        //cardsModel:  ["A","A","B","B","C","C","D","D"]
+        //rows: 2; columns: 4
+
+        cardsModel: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+                     "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+        rows: 4; columns: 5
+
+        //cardsModel: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "O",
+        //             "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "O"]
+        //rows: 4; columns: 7
 
         Behavior on scorePlayer1 {
             PropertyAnimation {
@@ -40,41 +50,6 @@ Window {
             PropertyAnimation {
                 easing.type: Easing.InQuad
                 duration: 350
-            }
-        }
-
-        property var cardsModel: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" ,"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"]
-        property var cardSize: (parent.width/10 > verticalSpace/6) ? verticalSpace/6 : parent.width/10
-        property var verticalSpace: parent.height - 3 * basicFontSize*2 - 2 * bottomBar.height
-
-        anchors.left: parent.left
-        anchors.leftMargin: (parent.width - cardSize*6 - 5*columnSpacing) / 2
-        anchors.bottomMargin: anchors.topMargin
-        anchors.top: topLabel.bottom
-        anchors.topMargin: basicFontSize*3
-        rows: 4; columns: 6
-
-        rowSpacing: verticalSpace/18
-        columnSpacing: parent.width/20
-
-        Repeater {
-            id: repeaterCards
-            model: parent.cardsModel
-            delegate: Card {
-                letter: modelData
-                width: parent.cardSize
-                onSelected: {
-                    if (cardsGrid.selectedCard1 >= 0 && cardsGrid.selectedCard2 >= 0) {
-                        checkTimer.stop();
-                        cardsGrid.checkGame();
-                    }
-                    if (cardsGrid.selectedCard1 < 0) {
-                        cardsGrid.selectedCard1 = index;
-                    } else {
-                        cardsGrid.selectedCard2 = index;
-                        checkTimer.start();
-                    }
-                }
             }
         }
 
@@ -121,7 +96,7 @@ Window {
                     labelColor: "black"
                 }
             },
-            State {                
+            State {
                 name: "player1"
                 when: cardsGrid.playing && cardsGrid.playerOne
                 PropertyChanges {
@@ -181,45 +156,6 @@ Window {
                 }
             }
         ]
-
-        function restartGame(){
-            var array = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L" ,"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
-            var temp, j;
-            for (var i = array.length - 1; i > 0; i--) {
-              j = Math.floor(Math.random() * (i + 1)); // random index from 0 to i
-              [array[i], array[j]] = [array[j], array[i]];
-            }
-            repeaterCards.model = array; cardsGrid.scorePlayer1 = cardsGrid.scorePlayer2 = 0;
-            cardsGrid.restart = false; cardsGrid.playing = true;
-        }
-
-        Timer {
-            id: checkTimer
-            interval: 1000
-            onTriggered: cardsGrid.checkGame()
-        }
-
-        function checkGame(){
-            if (cardsGrid.children[selectedCard1].letter
-                    == cardsGrid.children[selectedCard2].letter) {
-                cardsGrid.children[selectedCard1].opacity = cardsGrid.children[selectedCard2].opacity = 0.2
-                addPoint()
-            } else {
-                cardsGrid.children[selectedCard1].flipped = cardsGrid.children[selectedCard2].flipped = false
-                playerOne = !playerOne
-            }
-            selectedCard1 = selectedCard2 = -1;
-        }
-
-        function addPoint(){
-            if(scorePlayer1 + scorePlayer2 == 55)
-                playing = false;
-            if(playerOne)
-                scorePlayer1 += 5;
-            else
-                scorePlayer2 += 5;
-
-        }
     }
 
     ScoreBar {
@@ -236,7 +172,6 @@ Window {
             font.pixelSize: basicFontSize*1.5; font.family: "Heveltica"; font.bold: true
             height: basicFontSize*3; width: text.length*font.pixelSize
             onPressed: {
-                cardsGrid.playing = false; cardsGrid.restart = true
                 cardsGrid.restartGame()
             }
         }

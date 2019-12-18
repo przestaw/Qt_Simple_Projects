@@ -14,7 +14,7 @@ Flipable {
         anchors.fill: parent
         radius: parent.width/10
         border.color: "white"
-        border.width: parent.width/20
+        border.width: parent.width/18
         color: "black"
     }
 
