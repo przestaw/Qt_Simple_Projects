@@ -23,11 +23,11 @@ Window {
         id: cardsGrid
         anchors.left: parent.left
         anchors.top: topLabel.bottom
-        anchors.leftMargin: (parent.width - cardSize*columns - columnSpacing*(columns-1) ) / 2
+        anchors.leftMargin: (parent.width - cardSize*columns - columnSpacing*(columns-1)) / 2
         anchors.topMargin: basicFontSize * 4
 
         horizontalSpace: parent.width
-        verticalSpace: parent.height - 2 * anchors.topMargin - 2 * bottomBar.height
+        verticalSpace: parent.height - 2 * anchors.topMargin - bottomBar.height
 
         //cardsModel:  ["A","A","B","B","C","C","D","D"]
         //rows: 2; columns: 4

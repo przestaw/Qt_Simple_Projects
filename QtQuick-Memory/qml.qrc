@@ -4,5 +4,6 @@
         <file>qml/main.qml</file>
         <file>qml/ScoreBar.qml</file>
         <file>qml/TopLabel.qml</file>
+        <file>qml/CardsGrid.qml</file>
     </qresource>
 </RCC>
